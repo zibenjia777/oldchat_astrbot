@@ -1,0 +1,122 @@
+name: astrbot_plugin_oldchat
+display_name: OldChat 旗舰适配器
+desc: 全功能集成 OldChat Lite，支持自定义服务器地址和 API 路径前缀，适用于官方及所有第三方部署版本。
+short_desc: OldChat 全功能旗舰版（可自定义服务器 + API 前缀）
+author: AstrBot Community
+version: 5.2.0
+support_platforms:
+  - oldchat
+logo_path: logo.png
+extra:
+  config_schema:
+    # -------- 服务器地址配置（新增） --------
+    - key: server_base_url
+      type: string
+      default: "http://60.205.94.101:8080"
+      label: 服务器基础地址
+      placeholder: 例如 http://60.205.94.101:8080
+      description: 不要包含 /v1 或任何路径，只填协议+域名+端口
+
+    - key: api_path_prefix
+      type: string
+      default: "/v1"
+      label: API 路径前缀
+      placeholder: 例如 /v1 或留空
+      description: 官方版本为 /v1；若服务器部署在根目录请填 / 或留空
+
+    # -------- 核心认证 --------
+    - key: username
+      type: string
+      required: true
+      label: 用户名
+      placeholder: 请输入 OldChat 用户名
+    - key: password
+      type: string
+      required: true
+      label: 密码
+      placeholder: 请输入密码
+      encrypted: true
+    - key: device_id
+      type: string
+      default: astrbot_ultimate
+      label: 设备标识
+
+    # -------- 管理员与权限 --------
+    - key: admin_users
+      type: string
+      default: ""
+      label: 管理员 UID 列表
+      placeholder: 逗号分隔，如 UID1,UID2
+      description: 拥有所有管理命令权限的用户
+    - key: group_whitelist
+      type: string
+      default: ""
+      label: 群组白名单
+      placeholder: 留空则允许所有群组
+    - key: user_whitelist
+      type: string
+      default: ""
+      label: 私聊白名单
+      placeholder: 留空则允许所有用户
+
+    # -------- 红包配置 --------
+    - key: redpacket_enabled
+      type: boolean
+      default: true
+      label: 启用红包功能
+    - key: redpacket_default_amount
+      type: int
+      default: 100
+      label: 红包默认总金额（金币）
+    - key: redpacket_default_count
+      type: int
+      default: 5
+      label: 红包默认份数
+    - key: redpacket_default_title
+      type: string
+      default: "恭喜发财，大吉大利"
+      label: 红包默认标题
+    - key: redpacket_auto_claim
+      type: boolean
+      default: false
+      label: 自动领取红包
+      description: 建议仅测试环境开启
+
+    # -------- 阅后即焚 --------
+    - key: burn_enabled
+      type: boolean
+      default: true
+      label: 启用阅后即焚功能
+    - key: burn_default_seconds
+      type: int
+      default: 10
+      label: 阅后即焚默认秒数
+      description: 可选 5,10,20,30,60,300
+
+    # -------- 自动行为 --------
+    - key: auto_accept_friend
+      type: boolean
+      default: false
+      label: 自动通过好友请求
+    - key: auto_join_group
+      type: boolean
+      default: false
+      label: 自动处理入群请求
+    - key: reply_with_mention
+      type: boolean
+      default: true
+      label: 群聊回复时 @ 提问者
+    - key: auto_checkin
+      type: boolean
+      default: false
+      label: 自动每日签到
+
+    # -------- 性能和网络 --------
+    - key: ws_reconnect_max_delay
+      type: int
+      default: 60
+      label: WS 最大重连间隔(秒)
+    - key: cache_refresh_interval
+      type: int
+      default: 1800
+      label: 缓存刷新间隔(秒)
