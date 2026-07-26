@@ -7,36 +7,53 @@ from astrbot import logger
 from .oldchat_platform_adapter import OldChatPlatformAdapter
 
 
-@register("astrbot_plugin_oldchat", "AstrBot Community", "OldChat 旗舰适配器", "5.2.0")
+@register(
+    name="astrbot_plugin_oldchat",
+    display_name="OldChat 旗舰适配器",
+    version="5.2.0",
+    author="AstrBot Community"
+)
 class OldChatPlugin(Star):
 
     def __init__(self, context: Context, config: dict):
         super().__init__(context)
         self.config = config
-        self.adapter: Optional[OldChatPlatformAdapter] = None
 
     async def initialize(self):
         logger.info("OldChat 旗舰适配器 v5.2.0 已加载")
 
+    # ---------- 辅助方法：获取适配器实例 ----------
+    def _get_adapter(self) -> Optional[OldChatPlatformAdapter]:
+        """从当前上下文中获取 OldChat 平台适配器"""
+        if not hasattr(self.context, 'platform_adapters'):
+            return None
+        for adapter in self.context.platform_adapters:
+            if isinstance(adapter, OldChatPlatformAdapter):
+                return adapter
+        return None
+
     def _is_admin(self, event: AstrMessageEvent) -> bool:
-        if not self.adapter or not self.adapter.client:
+        adapter = self._get_adapter()
+        if not adapter or not adapter.client:
             return False
         sender_uid = event.get_sender_id()
-        return sender_uid in self.adapter._admin_uids
+        return sender_uid in adapter._admin_uids
 
     def _get_client(self):
-        if not self.adapter:
+        adapter = self._get_adapter()
+        if not adapter:
             return None
-        return self.adapter.client
+        return adapter.client
 
     # ========== 基础命令 ==========
 
     @filter.command("oldchat")
     async def oldchat_status(self, event: AstrMessageEvent):
-        if not self.adapter or not self.adapter.client:
+        adapter = self._get_adapter()
+        if not adapter or not adapter.client:
             yield event.result().plain_message("❌ 适配器未运行")
             return
-        c = self.adapter.client
+        c = adapter.client
         unread = await c.get_unread_count()
         yield event.result().plain_message(
             f"""📡 OldChat 状态
@@ -47,7 +64,7 @@ class OldChatPlugin(Star):
 👥 好友缓存: {len(c.friend_cache)} 人
 📚 群组缓存: {len(c.group_member_cache)} 个
 📩 未读消息: 私聊 {unread.get('direct_total', 0)} | 群聊 {unread.get('group_total', 0)}
-👑 管理员: {list(self.adapter._admin_uids)}"""
+👑 管理员: {list(adapter._admin_uids)}"""
         )
 
     # ========== 红包命令 ==========
@@ -70,7 +87,7 @@ class OldChatPlugin(Star):
         except ValueError:
             yield event.result().plain_message("❌ 金额和份数必须为数字")
             return
-        title = " ".join(args[6:]) if len(args) > 6 else self.adapter.config.get("redpacket_default_title", "恭喜发财")
+        title = " ".join(args[6:]) if len(args) > 6 else self.config.get("redpacket_default_title", "恭喜发财")
 
         c = self._get_client()
         if not c:
